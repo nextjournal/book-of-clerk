@@ -1,13 +1,12 @@
 {:paths ["dev"]
  :deps {org.clojure/clojure {:mvn/version "1.10.3"}
-        io.github.nextjournal/clerk {:git/sha "eee44b103ffd5dc12a33c381e250a26394e8e9e1"}
+        io.github.nextjournal/clerk {:git/sha "2a1e5c573f3c71fa30ee1f5d6edcab07fea33c5a"}
 
         com.github.seancorfield/next.jdbc {:mvn/version "1.2.659"}
         org.xerial/sqlite-jdbc {:mvn/version "3.34.0"}        
         sicmutils/sicmutils {:mvn/version "0.20.0"}}
  
- :aliases {:nextjournal/clerk {:exec-fn nextjournal.clerk/build-static-app!
-                               :exec-args {:paths builder/copy-files+get-paths
-                                           :bundle? false
+ :aliases {:nextjournal/clerk {:exec-fn nextjournal.clerk/build!
+                               :exec-args {:paths-fn builder/copy-files+get-paths
                                            :git/url "https://github.com/nextjournal/book-of-clerk"}
                                :extra-deps {org.slf4j/slf4j-nop {:mvn/version "1.7.36"}}}}}
