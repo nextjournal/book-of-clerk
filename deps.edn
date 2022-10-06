@@ -1,6 +1,6 @@
 {:paths ["dev"]
  :deps {org.clojure/clojure {:mvn/version "1.10.3"}
-        io.github.nextjournal/clerk {:git/sha "ad3a36a59cf9d0dcc3a1f74366db3790d5d799e1"}
+        io.github.nextjournal/clerk {:git/sha "22cd69fcfed78c0169c4be3153fa59bac43e8cdd"}
 
         com.github.seancorfield/next.jdbc {:mvn/version "1.2.659"}
         org.xerial/sqlite-jdbc {:mvn/version "3.34.0"}        
@@ -9,7 +9,7 @@
  :aliases {:nextjournal/clerk {:exec-fn nextjournal.clerk/build!
                                :exec-args {:index "book.clj"
                                            :paths-fn builder/copy-files+get-paths
-                                           :git/sha "ad3a36a59cf9d0dcc3a1f74366db3790d5d799e1"
+                                           :git/sha "22cd69fcfed78c0169c4be3153fa59bac43e8cdd"
                                            :git/url "https://github.com/nextjournal/clerk"}
                                :main-opts ["-m" "babashka.cli.exec"]
                                :extra-deps {org.slf4j/slf4j-nop {:mvn/version "1.7.36"}
