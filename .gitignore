@@ -3,8 +3,6 @@
 .clerk/
 .cpcache/
 .lsp/
-book.clj
-chinook.db
 node_modules
 notebooks/scratch*
 /public/js/

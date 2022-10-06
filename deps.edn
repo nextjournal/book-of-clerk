@@ -7,8 +7,8 @@
         sicmutils/sicmutils {:mvn/version "0.20.0"}}
  
  :aliases {:nextjournal/clerk {:exec-fn nextjournal.clerk/build!
-                               :exec-args {:index "clerk/book.clj"
-                                           :paths-fn builder/copy-files+get-paths}
+                               :exec-args {:index "book.clj"}
                                :main-opts ["-m" "babashka.cli.exec"]
                                :extra-deps {org.slf4j/slf4j-nop {:mvn/version "1.7.36"}
-                                            org.babashka/cli {:mvn/version "0.4.37"}}}}}
+                                            org.babashka/cli {:mvn/version "0.4.37"}}}
+           :clerk/bump {:exec-fn builder/copy-book!}}}
