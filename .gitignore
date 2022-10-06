@@ -3,7 +3,7 @@
 .clerk/
 .cpcache/
 .lsp/
-index.clj
+book.clj
 chinook.db
 node_modules
 notebooks/scratch*
