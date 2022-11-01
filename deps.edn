@@ -11,4 +11,5 @@
                                :main-opts ["-m" "babashka.cli.exec"]
                                :extra-deps {org.slf4j/slf4j-nop {:mvn/version "1.7.36"}
                                             org.babashka/cli {:mvn/version "0.4.37"}}}
-           :clerk/bump {:exec-fn builder/copy-book!}}}
+           :clerk/bump {:exec-fn builder/copy-book!
+                        :exec-args {:compile-css true}}}}
