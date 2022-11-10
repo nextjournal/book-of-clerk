@@ -1,15 +1,16 @@
 {:paths ["dev"]
  :deps {org.clojure/clojure {:mvn/version "1.10.3"}
-        io.github.nextjournal/clerk {:git/sha "9ea265c1e38aebbc5fd0524e3f3a29771d89a79e"}
+        io.github.nextjournal/clerk {:git/sha "8f376762847bc1728b12679111b09c5943a70990"}
 
         com.github.seancorfield/next.jdbc {:mvn/version "1.2.659"}
         org.xerial/sqlite-jdbc {:mvn/version "3.34.0"}        
         sicmutils/sicmutils {:mvn/version "0.20.0"}}
  
  :aliases {:nextjournal/clerk {:exec-fn nextjournal.clerk/build!
-                               :exec-args {:index "book.clj"}
+                               :exec-args {:index "book.clj"
+                                           :compile-css true
+                                           :ssr true}
                                :main-opts ["-m" "babashka.cli.exec"]
                                :extra-deps {org.slf4j/slf4j-nop {:mvn/version "1.7.36"}
                                             org.babashka/cli {:mvn/version "0.4.37"}}}
-           :clerk/bump {:exec-fn builder/copy-book!
-                        :exec-args {:compile-css true}}}}
+           :clerk/bump {:exec-fn builder/copy-book!}}}
