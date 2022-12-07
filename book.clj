@@ -279,7 +279,7 @@
 
 ;; On the other hand, smaller images are centered and shown using their intrinsic dimensions:
 
-(ImageIO/read (URL. "https://etc.usf.edu/clipart/36600/36667/thermos_36667_sm.gif"))
+(ImageIO/read (URL. "https://nextjournal.com/data/QmSJ6eu6kUFeWrqXyYaiWRgJxAVQt2ivaoNWc1dtTEADCf?filename=thermo.png&content-type=image/png"))
 
 ;; ### 📒 Markdown
 
@@ -296,13 +296,13 @@
 ;; your items. You can use this to size your containers accordingly.
 
 ^{::clerk/visibility {:code :hide :result :hide}}
-(def image-1 (ImageIO/read (URL. "https://etc.usf.edu/clipart/62300/62370/62370_letter-a_lg.gif")))
+(def image-1 (ImageIO/read (URL. "https://nextjournal.com/data/QmU9dbBd89MUK631CoCtTwBi5fX4Hgx2tTPpiL4VStg8J7?filename=a.gif&content-type=image/gif")))
 
 ^{::clerk/visibility {:code :hide :result :hide}}
-(def image-2 (ImageIO/read (URL. "https://etc.usf.edu/clipart/72700/72783/72783_floral_b_lg.gif")))
+(def image-2 (ImageIO/read (URL. "https://nextjournal.com/data/QmfKZzHCBQKU7KKXQqcje5cgR6zLge3CcxeuZe8moUkJxf?filename=b.gif&content-type=image/gif")))
 
 ^{::clerk/visibility {:code :hide :result :hide}}
-(def image-3 (ImageIO/read (URL. "https://etc.usf.edu/clipart/72700/72787/72787_floral_c_lg.gif")))
+(def image-3 (ImageIO/read (URL. "https://nextjournal.com/data/QmXALbNeDD6NSudgVfHE5SvY1Xjzbj7TSWnARqcZrvXsss?filename=c.gif&content-type=image/gif")))
 
 
 (clerk/row image-1 image-2 image-3)
@@ -382,6 +382,13 @@
    {:temperature 39.0 :date (java.time.LocalDate/parse "2022-08-01")}
    {:temperature 34.0 :date (java.time.LocalDate/parse "2022-08-01")}
    {:temperature 29.0 :date (java.time.LocalDate/parse "2022-08-01")}])
+
+;; As you can see above, the table viewer is being applied to the
+;; value of the `my-dataset` var, not the var itself. If you want your viewer to access the raw var, you can opt out of this with a truthy `:var-from-def?` key on the viewer.
+
+^{::clerk/viewer (assoc v/fallback-viewer :var-from-def? true)}
+(def raw-var :baz)
+
 
 ;; ### 👁 Writing Viewers
 
@@ -500,7 +507,7 @@ v/table-viewer
 (def custom-table-viewer
   (add-child-viewers v/table-viewer
                      [(assoc v/table-head-viewer :transform-fn (v/update-val (partial map (comp (partial str "Column: ") str/capitalize name))))
-                      (assoc v/table-missing-viewer :render-fn '(fn [x] (v/html [:span.red "N/A"])))]))
+                      (assoc v/table-missing-viewer :render-fn '(fn [x] [:span.red "N/A"]))]))
 
 (clerk/with-viewer custom-table-viewer
   {:col/a [1 2 3 4] :col/b [1 2 3] :col/c [1 2 3]})
@@ -521,7 +528,7 @@ v/table-viewer
 
 ^{::clerk/viewer show-raw-value}
 (v/present (clerk/with-viewer {:transform-fn clerk/mark-presented
-                               :render-fn '(fn [x] (v/html [:pre (pr-str x)]))}
+                               :render-fn '(fn [x] [:pre (pr-str x)])}
              [1 2 3]))
 
 ;; Clerk's presentation will also transform maps into sequences in
@@ -569,18 +576,17 @@ v/table-viewer
    :transform-fn (comp clerk/mark-preserve-keys
                        (clerk/update-val transform-literal))
    :render-fn '(fn [label->val]
-                 (v/html
-                  (reagent/with-let [!selected-label (reagent/atom (ffirst label->val))]
-                    [:<> (into
-                          [:div.flex.items-center.font-sans.text-xs.mb-3
-                           [:span.text-slate-500.mr-2 "View-as:"]]
-                          (map (fn [label]
-                                 [:button.px-3.py-1.font-medium.hover:bg-indigo-50.rounded-full.hover:text-indigo-600.transition
-                                  {:class (if (= @!selected-label label) "bg-indigo-100 text-indigo-600" "text-slate-500")
-                                   :on-click #(reset! !selected-label label)}
-                                  label]))
-                          (keys label->val))
-                     [v/inspect-presented (get label->val @!selected-label)]])))})
+                 (reagent/with-let [!selected-label (reagent/atom (ffirst label->val))]
+                   [:<> (into
+                         [:div.flex.items-center.font-sans.text-xs.mb-3
+                          [:span.text-slate-500.mr-2 "View-as:"]]
+                         (map (fn [label]
+                                [:button.px-3.py-1.font-medium.hover:bg-indigo-50.rounded-full.hover:text-indigo-600.transition
+                                 {:class (if (= @!selected-label label) "bg-indigo-100 text-indigo-600" "text-slate-500")
+                                  :on-click #(reset! !selected-label label)}
+                                 label]))
+                         (keys label->val))
+                    [v/inspect-presented (get label->val @!selected-label)]]))})
 
 ;; Now let's see if this works. Try switching to the original
 ;; representation!
