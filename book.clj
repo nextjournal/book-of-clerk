@@ -58,7 +58,7 @@
 ;; To use Clerk in your project, add the following dependency to your `deps.edn`:
 
 ;; ```edn
-;; {:deps {io.github.nextjournal/clerk {:mvn/version "0.13.842"}}}
+;; {:deps {io.github.nextjournal/clerk {:mvn/version "0.14.919"}}}
 ;; ```
 
 ;; Require and start Clerk as part of your system start, e.g. in `user.clj`:
@@ -95,7 +95,7 @@
 
 ;; In Emacs, add the following to your config:
 
-;; ```elisp
+;; ```el
 ;; (defun clerk-show ()
 ;;   (interactive)
 ;;   (when-let
@@ -121,7 +121,7 @@
 
 ;; With [neovim](https://neovim.io/) + [conjure](https://github.com/Olical/conjure/) one can use the following vimscript function to save the file and show it with Clerk:
 
-;; ```
+;; ```vimscript
 ;; function! ClerkShow()
 ;; exe "w"
 ;; exe "ConjureEval (nextjournal.clerk/show! \"" . expand("%:p") . "\")"
@@ -251,7 +251,7 @@
 
 ;; ### 🎼 Code
 
-;; The code viewer uses
+;; By default the code viewer uses
 ;; [clojure-mode](https://nextjournal.github.io/clojure-mode/) for
 ;; syntax highlighting.
 (clerk/code (macroexpand '(when test
@@ -261,6 +261,24 @@
 (clerk/code '(ns foo "A great ns" (:require [clojure.string :as str])))
 
 (clerk/code "(defn my-fn\n  \"This is a Doc String\"\n  [args]\n  42)")
+
+;; You can specify the language for syntax highlighting via `::clerk/opts`.
+(clerk/code {::clerk/opts {:language "python"}} "
+class Foo(object):
+    def __init__(self):
+        pass
+    def do_this(self):
+        return 1")
+
+;; Or use a code fence with a language in a markdown.
+
+(clerk/md "```c++
+#include <iostream>
+int main() {
+    std::cout << \" Hello, world! \" << std::endl
+    return 0
+}
+```")
 
 ;; ### 🏞 Images
 
@@ -455,20 +473,13 @@ v/default-viewers
 ;; transforms it such that Clerk can send it to the browser where it
 ;; will be rendered.
 
-
-^{::clerk/visibility {:code :fold :result :hide}}
-(defn show-raw-value [x]
-  (binding [*print-namespace-maps* false]
-    (clerk/code (with-out-str (clojure.pprint/pprint x)))))
-
 ;; Let's start with one of the simplest examples. You can see that
 ;; `present` takes our value `1` and transforms it into a map, with
 ;; `1` under a `:nextjournal/value` key and the number viewer assigned
 ;; under the `:nextjournal/viewer` key.  We call this map a
 ;; `wrapped-value`.
 
-
-^{::clerk/viewer show-raw-value}
+^{::clerk/viewer v/inspect-wrapped-values ::clerk/auto-expand-results? true}
 (v/present 1)
 
 ;; This data structure is sent over Clerk's websocket to the
@@ -477,7 +488,7 @@ v/default-viewers
 
 ;; Now onto something slightly more complex, `#{1 2 3}`.
 
-^{::clerk/viewer show-raw-value}
+^{::clerk/viewer v/inspect-wrapped-values ::clerk/auto-expand-results? true}
 (v/present #{1 2 3})
 
 
@@ -506,13 +517,14 @@ v/default-viewers
 ;; When writing your own viewer, the first extension point you should reach for is `:tranform-fn`.
 
 #_ "exercise: wrap this in `v/present` and call it at the REPL"
-(v/with-viewer {:transform-fn #(clerk/html [:pre (pr-str %)])}
+(v/with-viewer {:transform-fn v/inspect-wrapped-values}
   "Exploring the viewer api")
 
 ;; As you can see the argument to the `:transform-fn` isn't just the
-;; string we're passing it, but a `wrapped-value`. We will look at
-;; what this enables in a bit. But let's look at one of the simplest
-;; examples first.
+;; string we're passing it, but a map with the original value under a
+;; `:nextjournal/value` key. We call this map a `wrapped-value`. We
+;; will look at what this enables in a bit. But let's look at one of
+;; the simplest examples first.
 
 ;; **A first simple example**
 
@@ -525,7 +537,7 @@ v/default-viewers
   "James Clerk Maxwell")
 
 ;; The `:transform-fn` runs on the JVM, which means you can explore what it does at your REPL by calling `v/present` on such a value.
-^{::clerk/viewer show-raw-value}
+^{::clerk/viewer v/inspect-wrapped-values}
 (v/present (v/with-viewer greet-viewer
              "James Clerk Maxwell"))
 
@@ -562,7 +574,7 @@ v/table-viewer
 ;; `clerk/mark-presented` as a `:transform-fn`. Compare the result
 ;; below in which `[1 2 3]` appears unaltered with what you see above.
 
-^{::clerk/viewer show-raw-value}
+^{::clerk/viewer v/inspect-wrapped-values}
 (v/present (clerk/with-viewer {:transform-fn clerk/mark-presented
                                :render-fn '(fn [x] [:pre (pr-str x)])}
              [1 2 3]))
@@ -573,7 +585,7 @@ v/table-viewer
 ;; `clerk/mark-preserve-keys`. This will still transform (and
 ;; paginate) the values of the map, but leave the keys unaltered.
 
-^{::clerk/viewer show-raw-value}
+^{::clerk/viewer v/inspect-wrapped-values ::clerk/auto-expand-results? true}
 (v/present (clerk/with-viewer {:transform-fn clerk/mark-preserve-keys}
              {:hello 42}))
 
@@ -600,12 +612,12 @@ v/table-viewer
 ;; also calls `clerk/mark-preserve-keys`. This tells Clerk to leave
 ;; the keys of the map as-is.
 
-;; In our `:render-fn`, which is called in the browser, we will receive
-;; this map. Note that this is a quoted form, not a function. Clerk
-;; will send this form to the browser for evaluation. There it will
-;; create a `reagent/atom` that holds the selection state. Lastly,
-;; `v/inspect-presented` is a component that takes a `wrapped-value`
-;; that ran through `v/present` and show it.
+;; In our `:render-fn`, which is called in the browser, we will receive this
+;; map. Note that this is a quoted form, not a function. Clerk will send this
+;; form to the browser for evaluation. There it will create a `reagent/atom`
+;; that holds the selection state. Lastly,
+;; `nextjournal.clerk.render/inspect-presented` is a component that takes a
+;; `wrapped-value` that ran through `v/present` and show it.
 
 (def literal-viewer
   {:pred sicmutils.expression/literal?
@@ -731,6 +743,44 @@ v/table-viewer
     Moving --> Crash
     Crash --> [*]")
 
+;; #### 🧙 Evaluator
+
+;; By default, [SCI](https://github.com/babashka/sci) is used for evaluating `:render-fn` functions in the browser.
+
+;; What follows is an intentionally inefficient but fun way to compute
+;; the nth fibonacci number and show how long it took.
+
+(def fib-viewer
+  {:render-fn '(fn [n opts]
+                 (reagent.core/with-let
+                   [fib (fn fib [x]
+                          (if (< x 2)
+                            1
+                            (+ (fib (dec x)) (fib (dec (dec x))))))
+                    time-before (js/performance.now)
+                    nth-fib (fib n)
+                    time-after (js/performance.now)]
+                   [:div
+                    [:p
+                     (if (= :cherry (-> opts :viewer :render-evaluator))
+                       "Cherry"
+                       "SCI")
+                     " computed the " n "th fibonacci number (" nth-fib ")"
+                     " in " (js/Math.ceil (- time-after time-before) 2) "ms."]]))})
+
+(clerk/with-viewer fib-viewer 25)
+
+;; You can opt into [cherry](https://github.com/squint-cljs/cherry) as an
+;; alternative evaluator by setting `{::clerk/render-evaluator :cherry}` via the
+;; viewers opts (see [Customizations](#customizations)). The main difference between cherry and SCI
+;; for viewer functions is performance. For performance-sensitive code cherry is
+;; better suited since it compiles directly to JavaScript code.
+
+(clerk/with-viewer fib-viewer {::clerk/render-evaluator :cherry} 25)
+
+#_(clerk/halt!)
+#_(clerk/serve! {:port 7777})
+
 ;; ## ⚙️ Customizations
 
 ;; Clerk allows easy customization of visibility, result width and
@@ -830,9 +880,7 @@ v/table-viewer
 ;; click and expand it first, set the
 ;; `:nextjournal.clerk/auto-expand-results?` option.
 
-
-^{::clerk/visibility {:code :hide}
-  ::clerk/auto-expand-results? true}
+^{::clerk/visibility {:code :fold}}
 (def rows
   (take 15 (repeatedly (fn []
                          {:name (str
@@ -841,6 +889,9 @@ v/table-viewer
                           :role (rand-nth [:admin :operator :manager :programmer :designer])
                           :dice (shuffle (range 1 7))}))))
 
+
+^{::clerk/auto-expand-results? true} rows
+
 ;; This option might become the default in the future.
 
 
@@ -848,10 +899,7 @@ v/table-viewer
 
 ;; In order to not send too much data to the browser, Clerk uses a per-result budget to limit. You can see this budget in action above. Use the `:nextjournal.clerk/budget` key to change its default value of `200` or disable it completely using `nil`.
 
-^{::clerk/budget nil
-  ::clerk/visibility {:code :hide}
-  ::clerk/auto-expand-results? true}
-rows
+^{::clerk/budget nil ::clerk/auto-expand-results? true} rows
 
 ;; ## 🧱 Static Building
 

@@ -1,6 +1,6 @@
 {:paths ["dev"]
  :deps {org.clojure/clojure {:mvn/version "1.10.3"}
-        io.github.nextjournal/clerk {:git/sha "1f6c5331418aaf9c5a4335fc2e6e95f07dc3af6b"}
+        io.github.nextjournal/clerk {:git/sha "e0030c63e79b0b75080afde67de21e5189e8b101"}
 
         com.github.seancorfield/next.jdbc {:mvn/version "1.2.659"}
         org.xerial/sqlite-jdbc {:mvn/version "3.34.0"}
