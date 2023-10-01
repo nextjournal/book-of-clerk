@@ -21,7 +21,7 @@
 
 ;; ## ⚖️ Rationale
 
-;; Computational notebooks allow arguing from evidence by mixing prose with executable code. For a good overview of problems users encounter in traditional notebooks like Jupyter, see [I don't like notebooks](https://www.youtube.com/watch?v=7jiPeIFXb6U) and [What’s Wrong with Computational Notebooks? Pain Points, Needs, and Design Opportunities](https://web.eecs.utk.edu/\~azh/pubs/Chattopadhyay2020CHI_NotebookPainpoints.pdf).
+;; Computational notebooks allow arguing from evidence by mixing prose with executable code. For a good overview of problems users encounter in traditional notebooks like Jupyter, see [I don't like notebooks](https://www.youtube.com/watch?v=7jiPeIFXb6U) and [What’s Wrong with Computational Notebooks? Pain Points, Needs, and Design Opportunities](https://www.microsoft.com/en-us/research/uploads/prod/2020/03/chi20c-sub8173-cam-i16.pdf).
 
 ;; Specifically Clerk wants to address the following problems:
 
@@ -38,6 +38,8 @@
 ;; * no external process: Clerk runs inside your Clojure process, giving Clerk access to all code on the classpath.
 
 ;; ## 🚀 Getting Started
+
+;; Clerk requires Java 11 or newer and [`clojure`](https://clojure.org/guides/install_clojure) installed.
 
 ;; ### 🤹 Clerk Demo
 
@@ -130,8 +132,6 @@
 ;; nmap <silent> <localleader>cs :execute ClerkShow()<CR>
 ;; ```
 
-
-
 ;; ## 🔍 Viewers
 
 ;; Clerk comes with a number of useful built-in viewers e.g. for
@@ -207,6 +207,23 @@
 (clerk/table {:head ["odd numbers" "even numbers"]
               :rows [[1 2] [3 4]]}) ;; map with `:rows` and optional `:head` keys
 
+;; To customize the number of rows in the table viewer, set
+;; `::clerk/page-size`. Use a value of `nil` to show all rows.
+(clerk/table {::clerk/page-size 7} (map (comp vector (partial str "Row #")) (range 1 31)))
+
+;; The built-in table viewer adds a number of child-viewers on its
+;; `:add-viewers` key. Those sub-viewers control the markup for the
+;; table and the display of strings (to turn off quoting inside table
+;; cells).
+(:add-viewers v/table-viewer)
+
+;; Modifying the `:add-viewers` key allows us to create a custom table
+;; viewer that shows missing values differently.
+(def table-viewer-custom-missing-values
+  (update v/table-viewer :add-viewers v/add-viewers [(assoc v/table-missing-viewer :render-fn '(fn [x] [:span.red "N/A"]))]))
+
+^{::clerk/viewer table-viewer-custom-missing-values}
+{:A [1 2 3] :B [1 3] :C [1 2]}
 
 
 ;; ### 🧮 TeX
@@ -544,18 +561,11 @@ v/default-viewers
 
 ;; **Passing modified viewers down the tree**
 
-#_ "TODO: move this into clerk?"
-(defn add-child-viewers [viewer viewers]
-  (update viewer :transform-fn (fn [transform-fn-orig]
-                                 (fn [wrapped-value]
-                                   (update (transform-fn-orig wrapped-value) :nextjournal/viewers clerk/add-viewers viewers)))))
-
 v/table-viewer
 
 (def custom-table-viewer
-  (add-child-viewers v/table-viewer
-                     [(assoc v/table-head-viewer :transform-fn (v/update-val (partial map (comp (partial str "Column: ") str/capitalize name))))
-                      (assoc v/table-missing-viewer :render-fn '(fn [x] [:span.red "N/A"]))]))
+  (update v/table-viewer :add-viewers v/add-viewers [(assoc v/table-head-viewer :transform-fn (v/update-val (partial map (comp (partial str "Column: ") str/capitalize name))))
+                                                     (assoc v/table-missing-viewer :render-fn '(fn [x] [:span.red "N/A"]))]))
 
 (clerk/with-viewer custom-table-viewer
   {:col/a [1 2 3 4] :col/b [1 2 3] :col/c [1 2 3]})
@@ -901,6 +911,20 @@ v/table-viewer
 
 ^{::clerk/budget nil ::clerk/auto-expand-results? true} rows
 
+;; ## 🚰 Tap Inspector
+
+;; Clerk comes with an inspector notebook for Clojure's tap system. Use the following form from your REPL to show it.
+
+;;```clojure
+;;(nextjournal.clerk/show! 'nextjournal.clerk.tap)
+;;```
+
+;; You can then call `tap>` from anywhere in your codebase and the Tap Inspector will show your value. This supports the full viewer api described above.
+
+;;```clojure
+;;(tap> (clerk/html [:h1 "Hello 🚰 Tap Inspector 👋"]))
+;;```
+
 ;; ## 🧱 Static Building
 
 ;; Clerk can make a static HTML build from a collection of notebooks.
@@ -916,7 +940,7 @@ v/table-viewer
 ;; Also notably, there is a `:compile-css` option which compiles a css
 ;; file containing only the used CSS classes from the generated
 ;; markup. (Otherwise, Clerk is using Tailwind's Play CDN script which
-;; can the page flicker, initially.)
+;; can make the page flicker, initially.)
 
 ;; If set, the `:ssr` option will use React's server-side-rendering to
 ;; include the generated markup in the build HTML.
