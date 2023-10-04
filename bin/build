@@ -1,0 +1,2 @@
+#!/bin/sh
+open "https://github.clerk.garden/nextjournal/book-of-clerk/commit/$(git rev-parse HEAD)"
