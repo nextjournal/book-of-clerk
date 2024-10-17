@@ -1,10 +1,9 @@
 {:paths ["dev"]
  :deps {org.clojure/clojure {:mvn/version "1.10.3"}
-        io.github.nextjournal/clerk {:git/sha "9c38ff3ef240c9bd21e596792adb2ebdbb5a738d"}
-
+        io.github.nextjournal/clerk {:git/sha "8a5aadf9cc332741bf26a5201c4519e00146e389"}
         com.github.seancorfield/next.jdbc {:mvn/version "1.2.659"}
         org.xerial/sqlite-jdbc {:mvn/version "3.34.0"}
-        sicmutils/sicmutils {:mvn/version "0.20.0"}}
+	    org.mentat/emmy {:mvn/version "0.32.0"}}
 
  :aliases {:nextjournal/clerk {:exec-fn nextjournal.clerk/build!
                                :exec-args {:index "book.clj"
