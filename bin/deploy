@@ -1,1 +1,1 @@
-bb -Sdeps '{:deps {io.github.nextjournal/garden-cli {:git/sha "85090c6ad3bfc24b3b1cb6dcf9bd64ab70885765"}}}' -m nextjournal.garden-cli domains update book.clerk.vision
+bb -Sdeps '{:deps {io.github.nextjournal/garden-cli {:git/sha "d8f0a6b5be8b2c36001390ad68d37abeb9c58b33"}}}' -m nextjournal.garden-cli domains update book.clerk.vision
