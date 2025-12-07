@@ -8,14 +8,14 @@
     :description "Clerk’s official documentation."
     :image "https://cdn.nextjournal.com/data/QmbHy6nYRgveyxTvKDJvyy2VF9teeXYkAXXDbgbKZK6YRC?filename=book-of-clerk-og-image.png&content-type=image/png"}}
   (:require [clojure.string :as str]
-            [next.jdbc :as jdbc]
-            [nextjournal.clerk :as clerk]
-            [nextjournal.clerk.parser :as parser]
-            [nextjournal.clerk.eval :as eval]
-            [nextjournal.clerk.analyzer :as ana]
-            [nextjournal.clerk.viewer :as v]
             [emmy.env :as emmy]
             [emmy.expression]
+            [next.jdbc :as jdbc]
+            [nextjournal.clerk :as clerk]
+            [nextjournal.clerk.analyzer :as ana]
+            [nextjournal.clerk.eval :as eval]
+            [nextjournal.clerk.parser :as parser]
+            [nextjournal.clerk.viewer :as v]
             [weavejester.dependency :as dep])
   (:import (javax.imageio ImageIO)
            (java.net URL)))
@@ -61,7 +61,7 @@
 ;; To use Clerk in your project, add the following dependency to your `deps.edn`:
 
 ;; ```edn
-;; {:deps {io.github.nextjournal/clerk {:mvn/version "0.17.1102"}}}
+;; {:deps {io.github.nextjournal/clerk {:mvn/version "0.18.1158"}}}
 ;; ```
 
 ;; Require and start Clerk as part of your system start, e.g. in `user.clj`:
